@@ -1,3 +1,4 @@
+# .github/workflows/convert.yml
 name: AI Singing Voice Conversion
 
 on:
@@ -31,9 +32,14 @@ jobs:
       - name: Install dependencies (avoid conflicts)
         run: |
           python -m pip install --upgrade pip
-          git clone
-        run: |
-          chmod +x scripts/run_conversion.sh
+          git clone https://github.com/svc-develop-team/so-vits-svc.git svc
+          # Core deps pinned for Python 3.9 compatibility
+          pip install torch soundfile numpy scipy librosa pydub fairseq==0.12.2 hydra-core==1.0.7 omegaconf==2.0.6
+          # Install svc package without dependencies
+          pip install --no-deps -e svc
+
+      - name: Make script executable
+        run: chmod +x scripts/run_conversion.sh
 
       - name: Run conversion script
         run: |
