@@ -27,14 +27,14 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.10'
 
       - name: Install dependencies (avoid conflicts)
         run: |
-          python -m pip install --upgrade pip
+          python -m pip install 'pip<24.1'
           git clone https://github.com/svc-develop-team/so-vits-svc.git svc
-          # Core deps pinned for Python 3.9 compatibility
-          pip install torch soundfile numpy scipy librosa pydub fairseq==0.12.2 hydra-core==1.0.7 omegaconf==2.0.6
+          # Core deps pinned for Python 3.10 compatibility
+          pip install torch soundfile numpy scipy librosa pydub fairseq==0.12.2 hydra-core==2.0.6 omegaconf==2.0.6
           # Install svc package without dependencies
           pip install --no-deps -e svc
 
