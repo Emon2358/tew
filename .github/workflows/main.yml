@@ -29,9 +29,12 @@ jobs:
       - name: Install pip and core Python packages
         run: |
           python -m pip install --upgrade pip==23.3.2 setuptools wheel
-          pip install cython numpy
+          pip install cython>=0.29.14 numpy
 
       - name: Install Python dependencies
+        run: |
+          pip install --no-cache-dir -r requirements.txt
+          pip install --no-cache-dir -r so-vits-svc/requirements.txt
         run: |
           pip install --no-cache-dir -r requirements.txt
           pip install --no-cache-dir -r so-vits-svc/requirements.txt
