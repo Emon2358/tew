@@ -1,4 +1,3 @@
-# .github/workflows/convert.yml
 name: AI Singing Voice Conversion
 
 on:
@@ -8,29 +7,10 @@ on:
         description: 'Path to input MP3 file (in repo)'
         required: true
         default: 'input.mp3'
-      lyrics_content:
-        description: |
-          Lyrics block to use for conversion. Example:
-          こんな自分に　未来はあるの？
-          こんな世界に　私はいるの？
-          今切ないの？　今悲しいの？
-          自分のことも　解からないまま
-
-          歩むことさえ　疲れるだけよ
-          人のことなど　知りもしないわ
-          こんな私も　変われるのなら
-          もし変われるのなら　白になる
+      lyrics_file:
+        description: 'Path to lyrics text file (in repo)'
         required: true
-        default: |
-          こんな自分に　未来はあるの？
-          こんな世界に　私はいるの？
-          今切ないの？　今悲しいの？
-          自分のことも　解からないまま
-
-          歩むことさえ　疲れるだけよ
-          人のことなど　知りもしないわ
-          こんな私も　変われるのなら
-          もし変われるのなら　白になる
+        default: 'lyrics.txt'
       output_mp3:
         description: 'Filename for output MP3'
         required: true
@@ -43,7 +23,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python 3.9
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
@@ -55,34 +35,19 @@ jobs:
           pip install -r svc/requirements.txt
           pip install torch soundfile numpy scipy librosa pydub
 
-      - name: Generate lyrics file
+      - name: Ensure script is executable
         run: |
-          echo "${{ github.event.inputs.lyrics_content }}" > lyrics.txt
+          chmod +x scripts/run_conversion.sh
 
-      - name: Convert MP3 to WAV
+      - name: Run conversion script
         run: |
-          python - << 'EOF'
-from pydub import AudioSegment
-AudioSegment.from_mp3('${{ github.event.inputs.input_mp3 }}').export('input.wav', format='wav')
-EOF
+          scripts/run_conversion.sh \
+            "${{ github.event.inputs.input_mp3 }}" \
+            "${{ github.event.inputs.lyrics_file }}" \
+            "${{ github.event.inputs.output_mp3 }}"
 
-      - name: Run singing voice conversion
-        run: |
-          python svc/inference.py \
-            --config svc/config.json \
-            --model_path svc/pretrained_model.pth \
-            --input input.wav \
-            --lyrics lyrics.txt \
-            --output output.wav
-
-      - name: Convert WAV back to MP3
-        run: |
-          python - << 'EOF'
-from pydub import AudioSegment
-AudioSegment.from_wav('output.wav').export('${{ github.event.inputs.output_mp3 }}', format='mp3')
-EOF
-
-      - name: Create GitHub Release and Upload
+      - name: Create GitHub Release
+        id: create_release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: converted-${{ github.run_id }}
