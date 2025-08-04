@@ -34,7 +34,8 @@ jobs:
       - name: Download Spleeter pretrained model
         run: |
           mkdir -p ~/.cache/spleeter/pretrained_models
-          wget https://github.com/deezer/spleeter/releases/download/v1.5.0/2stems.tar.gz \
+          # Using the release assets from jinay1991's fork
+          wget https://github.com/jinay1991/spleeter/releases/download/v1.5.0/2stems.tar.gz \
             -O 2stems.tar.gz
           tar -xzf 2stems.tar.gz -C ~/.cache/spleeter/pretrained_models
 
