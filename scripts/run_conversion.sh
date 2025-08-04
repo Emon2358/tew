@@ -6,16 +6,16 @@ INPUT_MP3="$1"
 LYRICS_FILE="$2"
 OUTPUT_MP3="$3"
 
-# Prepare working files
+# 歌詞ファイルをコピーしてワークディレクトリに配置
 cp "$LYRICS_FILE" lyrics.txt
 
-# Convert MP3 to WAV
+# MP3 を WAV に変換
 python - << 'EOF'
 from pydub import AudioSegment
 AudioSegment.from_mp3('$INPUT_MP3').export('input.wav', format='wav')
 EOF
 
-# Run singing voice conversion
+# So-VITS-SVC で歌声変換を実行
 python svc/inference.py \
   --config svc/config.json \
   --model_path svc/pretrained_model.pth \
@@ -23,7 +23,7 @@ python svc/inference.py \
   --lyrics lyrics.txt \
   --output output.wav
 
-# Convert WAV back to MP3
+# 出力 WAV を MP3 に再変換
 python - << 'EOF'
 from pydub import AudioSegment
 AudioSegment.from_wav('output.wav').export('$OUTPUT_MP3', format='mp3')
