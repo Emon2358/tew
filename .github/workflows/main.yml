@@ -31,6 +31,13 @@ jobs:
           python -m pip install --upgrade pip==23.3.2 setuptools wheel
           pip install cython>=0.29.14 numpy
 
+      - name: Download Spleeter pretrained model
+        run: |
+          mkdir -p ~/.cache/spleeter/pretrained_models
+          wget https://github.com/deezer/spleeter/releases/download/v1.5.0/2stems.tar.gz \
+            -O 2stems.tar.gz
+          tar -xzf 2stems.tar.gz -C ~/.cache/spleeter/pretrained_models
+
       - name: Install Python dependencies
         run: |
           pip install --no-cache-dir -r requirements.txt
