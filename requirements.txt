@@ -1,0 +1,3 @@
+spleeter[all]
+pydub
+gTTS
