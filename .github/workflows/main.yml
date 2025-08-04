@@ -1,66 +1,53 @@
-# .github/workflows/convert.yml
-name: AI Singing Voice Conversion
-
+name: Release Converted Track
 on:
+  push:
+    tags:
+      - 'v*.*.*'             # セマンティックバージョンのタグ（例: v1.0.0）
   workflow_dispatch:
-    inputs:
-      input_mp3:
-        description: 'Path to input MP3 file (in repo)'
-        required: true
-        default: 'input.mp3'
-      lyrics_file:
-        description: 'Path to lyrics text file (in repo)'
-        required: true
-        default: 'lyrics.txt'
-      output_mp3:
-        description: 'Filename for output MP3'
-        required: true
-        default: 'converted.mp3'
 
 jobs:
-  convert:
+  build-and-release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Clone so-vits-svc
+        run: |
+          git clone https://github.com/svc-develop-team/so-vits-svc.git so-vits-svc
+
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.8'
 
-      - name: Install dependencies (avoid conflicts)
+      - name: Install dependencies
         run: |
-          python -m pip install 'pip<24.1'
-          git clone https://github.com/svc-develop-team/so-vits-svc.git svc
-          # Core deps pinned for Python 3.10 compatibility
-          pip install torch soundfile numpy scipy librosa pydub fairseq==0.12.2 hydra-core==2.0.6 omegaconf==2.0.6
-          # Install svc package without dependencies
-          pip install --no-deps -e svc
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r so-vits-svc/requirements.txt
 
-      - name: Make script executable
-        run: chmod +x scripts/run_conversion.sh
-
-      - name: Run conversion script
+      - name: Run conversion
         run: |
-          scripts/run_conversion.sh \
-            "${{ github.event.inputs.input_mp3 }}" \
-            "${{ github.event.inputs.lyrics_file }}" \
-            "${{ github.event.inputs.output_mp3 }}"
+          python convert_and_replace.py
 
       - name: Create GitHub Release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: actions/create-release@v1
         with:
-          tag_name: converted-${{ github.run_id }}
-          name: Converted Vocal ${{ github.run_id }}
+          tag_name: ${{ github.ref_name }}
+          release_name: Converted Track ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          body: |
+            This release contains the converted track `output_nichibasnight.mp3`.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload MP3 to Release
+      - name: Upload release asset
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.event.inputs.output_mp3 }}
-          asset_name: ${{ github.event.inputs.output_mp3 }}
+          asset_path: output_nichibasnight.mp3
+          asset_name: output_nichibasnight.mp3
           asset_content_type: audio/mpeg
