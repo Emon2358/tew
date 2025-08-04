@@ -33,7 +33,7 @@ jobs:
           python -m pip install --upgrade pip
           git clone https://github.com/svc-develop-team/so-vits-svc.git svc
           # Install core dependencies explicitly to satisfy versions
-          pip install torch soundfile numpy scipy librosa pydub fairseq==0.12.2 hydra-core==2.0.6 omegaconf>=2.0.5,<2.1
+          pip install torch soundfile numpy scipy librosa pydub fairseq==0.12.2 hydra-core==2.0.6 'omegaconf>=2.0.5,<2.1'
           # Install remaining svc-only code without deps to avoid conflicts
           pip install --no-deps -e svc
 
